@@ -12,18 +12,17 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using GatewayTether.XmlDocument;
 
 namespace GatewayTether.Forms
 {
     public partial class AddWalletForm : Form
     {
         private readonly WalletRepository walletRepository;
-        private readonly ErrorRepository errorRepository;
         public AddWalletForm()
         {
             InitializeComponent();
             walletRepository = new WalletRepository();
-            errorRepository = new ErrorRepository();
         }
 
         private void AddWalletForm_Load(object sender, EventArgs e)
@@ -62,7 +61,7 @@ namespace GatewayTether.Forms
             }
             catch (Exception ex)
             {
-                errorRepository.AddError(ex, MethodBase.GetCurrentMethod().DeclaringType.FullName, ReflectionHelper.GetActualAsyncMethodName());
+                WriteXmlDocument.AddException(MethodBase.GetCurrentMethod().DeclaringType.FullName,ex);
                 MessageBox.Show("An error has occurred");
             }
         }

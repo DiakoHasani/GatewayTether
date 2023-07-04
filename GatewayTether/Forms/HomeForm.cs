@@ -1,5 +1,7 @@
-﻿using GatewayTether.Schedules;
+﻿using GatewayTether.Models;
+using GatewayTether.Schedules;
 using GatewayTether.Services;
+using GatewayTether.XmlDocument;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -28,7 +30,7 @@ namespace GatewayTether.Forms
                 txt_log.SelectionStart = txt_log.Text.Length;
                 txt_log.ScrollToCaret();
             });
-            
+
         }
 
         public async Task ShowMessage(string message)

@@ -1,6 +1,8 @@
 ﻿using GatewayTether.Entities;
 using GatewayTether.Models;
+using GatewayTether.XmlDocument;
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace GatewayTether.Apis
@@ -64,6 +66,7 @@ namespace GatewayTether.Apis
             }
             catch (Exception ex)
             {
+                WriteXmlDocument.AddException(MethodBase.GetCurrentMethod().DeclaringType.FullName, ex);
                 return new MessageModel
                 {
                     Result = false,

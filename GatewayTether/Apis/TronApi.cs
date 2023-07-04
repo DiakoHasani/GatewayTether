@@ -1,8 +1,10 @@
 ﻿using GatewayTether.Models;
+using GatewayTether.XmlDocument;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,7 +17,6 @@ namespace GatewayTether.Apis
         HttpResponseMessage response;
         public async Task<TransferTronModel> CallTransfer_Trc20(string walletAddress)
         {
-            //url = tronUrl + "token_trc20/transfers?limit=10&start=0&sort=-timestamp&count=true&relatedAddress=" + walletAddress;
             url = tronUrl + $"token_trc20/transfers?limit=20&start=0&sort=-timestamp&count=true&toAddress={walletAddress}&relatedAddress={walletAddress}";
             result = new TransferTronModel();
             try
@@ -45,6 +46,7 @@ namespace GatewayTether.Apis
             {
                 result.Result = false;
                 result.Message = "error in call api transfer walletAddress=" + walletAddress + ". exception message: " + ex.Message ?? "";
+                WriteXmlDocument.AddException(MethodBase.GetCurrentMethod().DeclaringType.FullName, ex);
             }
             return result;
         }

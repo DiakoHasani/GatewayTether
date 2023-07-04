@@ -1,9 +1,11 @@
 ﻿using GatewayTether.Entities;
 using GatewayTether.Models;
+using GatewayTether.XmlDocument;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,19 +21,43 @@ namespace GatewayTether.Repositories
 
         public List<TblWallet> GetAll()
         {
-            return dataContext.TblWallets.ToList();
+            try
+            {
+                return dataContext.TblWallets.ToList();
+            }
+            catch (Exception ex)
+            {
+                WriteXmlDocument.AddException(MethodBase.GetCurrentMethod().DeclaringType.FullName, ex);
+                return null;
+            }
         }
 
         public bool Update(TblWallet wallet)
         {
-            dataContext.Entry(wallet).State = EntityState.Modified;
-            return dataContext.SaveChanges() > 0;
+            try
+            {
+                dataContext.Entry(wallet).State = EntityState.Modified;
+                return dataContext.SaveChanges() > 0;
+            }
+            catch (Exception ex)
+            {
+                WriteXmlDocument.AddException(MethodBase.GetCurrentMethod().DeclaringType.FullName, ex);
+                return false;
+            }
         }
 
         public bool Add(TblWallet wallet)
         {
-            dataContext.TblWallets.Add(wallet);
-            return dataContext.SaveChanges() > 0;
+            try
+            {
+                dataContext.TblWallets.Add(wallet);
+                return dataContext.SaveChanges() > 0;
+            }
+            catch (Exception ex)
+            {
+                WriteXmlDocument.AddException(MethodBase.GetCurrentMethod().DeclaringType.FullName, ex);
+                return false;
+            }
         }
 
         public MessageModel ChangeEnabled(int id)
@@ -47,7 +73,7 @@ namespace GatewayTether.Repositories
                         return new MessageModel
                         {
                             Result = true,
-                            Message= "mission accomplished"
+                            Message = "mission accomplished"
                         };
                     }
                     else
@@ -68,8 +94,9 @@ namespace GatewayTether.Repositories
                     };
                 }
             }
-            catch
+            catch(Exception ex)
             {
+                WriteXmlDocument.AddException(MethodBase.GetCurrentMethod().DeclaringType.FullName, ex);
                 return new MessageModel
                 {
                     Result = false,

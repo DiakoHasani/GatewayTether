@@ -9,6 +9,7 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using GatewayTether.XmlDocument;
 
 namespace GatewayTether.Schedules
 {
@@ -21,7 +22,7 @@ namespace GatewayTether.Schedules
 
             ScheduledTasksCoordinator.Current.OnUnexpectedException = (exception, scheduledTask) =>
             {
-                new ErrorRepository().AddError(exception, MethodBase.GetCurrentMethod().DeclaringType.FullName, ReflectionHelper.GetActualAsyncMethodName());
+                WriteXmlDocument.AddException(MethodBase.GetCurrentMethod().DeclaringType.FullName, exception);
             };
 
             ScheduledTasksCoordinator.Current.Start();
@@ -45,7 +46,7 @@ namespace GatewayTether.Schedules
             }
             catch (Exception ex)
             {
-                new ErrorRepository().AddError(ex, MethodBase.GetCurrentMethod().DeclaringType.FullName, ReflectionHelper.GetActualAsyncMethodName());
+                WriteXmlDocument.AddException(MethodBase.GetCurrentMethod().DeclaringType.FullName, ex);
             }
         }
     }

@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using GatewayTether.XmlDocument;
 
 namespace GatewayTether.Schedules
 {
@@ -101,6 +102,12 @@ namespace GatewayTether.Schedules
                             //اگر آدرس کیف پول انتقالی داشته باشد شرط زیر اجرا می شود
                             if (tokenTransfers != null && tokenTransfers.Count > 0)
                             {
+                                WriteXmlDocument.AddLog(new LogModel<List<TokenTransferModel>>
+                                {
+                                    Address = MethodBase.GetCurrentMethod().DeclaringType.FullName,
+                                    Title = "List TokenTransfers model",
+                                    Data = tokenTransfers
+                                });
                                 //در متغیر زیر تمامی انتقال های جدید ذخیره می شود و آن ها را در دیتابیس ثبت کرده و سپس مقادیر آن را برای آدرس وب هوک ارسال می کند
                                 webhookTokens = new List<TokenTransferModel>();
 
@@ -128,6 +135,13 @@ namespace GatewayTether.Schedules
                                 //اگر انتقالی جدیدی اضافه شده باشد شرط زیر اجرا می شود
                                 if (webhookTokens.Count > 0)
                                 {
+                                    WriteXmlDocument.AddLog(new LogModel<List<TokenTransferModel>>
+                                    {
+                                        Address = MethodBase.GetCurrentMethod().DeclaringType.FullName,
+                                        Title = "List WebhookTokens model",
+                                        Data = webhookTokens
+                                    });
+
                                     //در اینجا انتقالی های جدید به دو جدول زیر اضافه می شود
                                     //TblTransfer در این جدول تمامی جزییات انتقالی ثبت می شود
                                     //TblWebhookRequest در این جدول انتقالی ها به صورت صف برای ارسال به آدرس کال بک کیف پول ثبت می شود
@@ -170,13 +184,13 @@ namespace GatewayTether.Schedules
                         }
                         else
                         {
-                            errorRepository.AddError(transferModel.Message, MethodBase.GetCurrentMethod().DeclaringType.FullName, ReflectionHelper.GetActualAsyncMethodName());
+                            WriteXmlDocument.AddError(MethodBase.GetCurrentMethod().DeclaringType.FullName, "transferModel.Result == false", transferModel.Message);
                         }
                     }
                     catch (Exception ex)
                     {
                         await _scheduledTaskMessage.ShowMessage("error in try catch get wallets. exception message: " + ex.Message ?? "");
-                        errorRepository.AddError(ex, MethodBase.GetCurrentMethod().DeclaringType.FullName, ReflectionHelper.GetActualAsyncMethodName());
+                        WriteXmlDocument.AddException(MethodBase.GetCurrentMethod().DeclaringType.FullName, ex);
                     }
                     await Task.Delay(TimeSpan.FromSeconds(10));
                 }
@@ -186,6 +200,17 @@ namespace GatewayTether.Schedules
 
                 //در اینجا لیست انتقالی های دریافت شده برای ارسال به آدرس کال بک گرفته می شود
                 webhookRequests = webhookRequestRepository.GetWaitingForSend().OrderBy(a => a.Id).ToList();
+
+                if (webhookRequests.Count > 0)
+                {
+                    WriteXmlDocument.AddLog(new LogModel<List<TblWebhookRequest>>
+                    {
+                        Address = MethodBase.GetCurrentMethod().DeclaringType.FullName,
+                        Title = "List webhookRequests model",
+                        Data = webhookRequests
+                    });
+                }
+
                 foreach (var webhookRequest in webhookRequests)
                 {
                     try
@@ -202,7 +227,7 @@ namespace GatewayTether.Schedules
                         }
                         else
                         {
-                            errorRepository.AddError(resultPostWebhook.Message, MethodBase.GetCurrentMethod().DeclaringType.FullName, ReflectionHelper.GetActualAsyncMethodName());
+                            WriteXmlDocument.AddError(MethodBase.GetCurrentMethod().DeclaringType.FullName, "error in post webhook", resultPostWebhook.Message);
                             webhookRequest.SendCount++;
                             webhookRequest.Sended = false;
                             webhookRequestRepository.Update(webhookRequest);
@@ -211,7 +236,7 @@ namespace GatewayTether.Schedules
                     catch (Exception ex)
                     {
                         await _scheduledTaskMessage.ShowMessage("error in post webhook request. exception: " + ex.Message ?? "");
-                        errorRepository.AddError(ex, MethodBase.GetCurrentMethod().DeclaringType.FullName, ReflectionHelper.GetActualAsyncMethodName());
+                        WriteXmlDocument.AddException(MethodBase.GetCurrentMethod().DeclaringType.FullName, ex);
                     }
                 }
                 #endregion
@@ -219,7 +244,7 @@ namespace GatewayTether.Schedules
             catch (Exception ex)
             {
                 await _scheduledTaskMessage.ShowMessage("error in first try catch exception message:" + ex.Message ?? "");
-                errorRepository.AddError(ex, MethodBase.GetCurrentMethod().DeclaringType.FullName, ReflectionHelper.GetActualAsyncMethodName());
+                WriteXmlDocument.AddException(MethodBase.GetCurrentMethod().DeclaringType.FullName, ex);
             }
             finally
             {
